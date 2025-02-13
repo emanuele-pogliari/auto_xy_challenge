@@ -37,7 +37,7 @@ class CarController extends AbstractController
         return $this->json($data);
     }
 
-    //web route
+    //web routes
     #[Route('/cars', name: 'car_list')]
     public function carList(CarRepository $carRepository): Response
     {
@@ -46,6 +46,24 @@ class CarController extends AbstractController
         return $this->render('cars/index.html.twig', [
             'cars' => $cars
         ]);
+    }
+
+    #[Route('/cars/add', name: 'car_add')]
+    public function addCar(): Response
+    {
+        return $this->render('cars/create.html.twig');
+    }
+
+    #[Route('/cars/{id}', name: 'car_show', methods: ['GET'])]
+    public function showCar(int $id): Response
+    {
+        return $this->render('cars/show.html.twig', ['id' => $id]);
+    }
+
+    #[Route('/cars/{id}/edit', name: 'car_edit', methods: ['POST', 'GET'])]
+    public function editCar(int $id): Response
+    {
+        return $this->render('cars/edit.html.twig', ['id' => $id]);
     }
 }    
 
