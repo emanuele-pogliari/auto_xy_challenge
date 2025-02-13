@@ -36,5 +36,16 @@ class CarController extends AbstractController
 
         return $this->json($data);
     }
+
+    //web route
+    #[Route('/cars', name: 'car_list')]
+    public function carList(CarRepository $carRepository): Response
+    {
+        $cars = $carRepository->findAll();
+    
+        return $this->render('cars/index.html.twig', [
+            'cars' => $cars
+        ]);
+    }
 }    
 

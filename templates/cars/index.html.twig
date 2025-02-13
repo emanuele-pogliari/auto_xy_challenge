@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Lista Auto</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Anno</th>
+            <th>Prezzo</th>
+            <th>Disponibilità</th>
+            <th>Modello</th>
+            <th>Marca</th>
+        </tr>
+        {% for car in cars %}
+            <tr>
+                <td>{{ car.id }}</td>
+                <td>{{ car.year }}</td>
+                <td>{{ car.price }}</td>
+                <td>{{ car.isAvailable ? 'Disponibile' : 'Venduta' }}</td>
+                <td>{{ car.model.name }}</td>
+                <td>{{ car.model.brand.name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
