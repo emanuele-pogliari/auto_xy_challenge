@@ -2,42 +2,57 @@
 
 namespace App\Controller;
 
+use App\Entity\Car;
 use App\Repository\CarRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+
+#[Route('/api')]
 class CarController extends AbstractController
 {
-    //api route
-    #[Route('/api/cars', name: 'api_cars_list', methods: ['GET'])]
-    public function getCars(CarRepository $carRepository): JsonResponse
+    public function __construct(
+        private readonly CarRepository $carRepository
+    ){}
+
+    //API ROUTES
+
+    //get all cars
+    #[Route('/cars', name: 'api_cars_list', methods: ['GET'])]
+    public function getCars(): JsonResponse
     {
-        $cars = $carRepository->findAll();
+        return $this->json($this->resultsForApi($this->carRepository->findAll()));
 
-        $data = [];
-        foreach ($cars as $car) {
-            $data[] = [
-                'id' => $car->getId(),
-                'year' => $car->getYear(),
-                'price' => $car->getPrice(),
-                'isAvailable' => $car->isAvailable(),
-                'model' => [
-                    'id' => $car->getModel()->getId(),
-                    'name' => $car->getModel()->getName(),
-                    'brand' => [
-                        'id' => $car->getModel()->getBrand()->getId(),
-                        'name' => $car->getModel()->getBrand()->getName(),
-                    ],
-                ],
-            ];
-        }
-
-        return $this->json($data);
     }
 
-    //web routes
+    private function resultsForApi(array $cars) : array
+    {
+        return array_map([$this, 'singleCar'], $cars);
+    }
+    //returning data of the single car
+    private function singleCar(Car $car): array
+    {            
+        return [
+            'id' => $car->getId(),
+            'year' => $car->getYear(),
+            'price' => $car->getPrice(),
+            'isAvailable' => $car->isAvailable(),
+            'model' => [
+                'id' => $car->getModel()->getId(),
+                'name' => $car->getModel()->getName(),
+            ],
+            'brand' => [
+                'id' => $car->getModel()->getBrand()->getId(),
+                'name' => $car->getModel()->getBrand()->getName(),
+            ],
+        ];
+    }
+
+
+    //WEB ROUTES
     #[Route('/cars', name: 'car_list')]
     public function carList(CarRepository $carRepository): Response
     {
