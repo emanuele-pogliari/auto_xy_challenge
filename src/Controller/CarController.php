@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Car;
+use App\Entity\CarModel;
 use App\Repository\CarRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,6 +44,34 @@ class CarController extends AbstractController
         return $this->json($this->resultsForApi([$car]));
     }
 
+    #[Route('/add', methods: ['POST'])]
+    public function add(Request $request): JsonResponse 
+    {
+        //convert json in an associative array
+        $data = json_decode($request->getContent(), true);
+
+        //create a new car Instance
+        $car = new Car();
+        $car->setYear($data['year']);
+        $car->setPrice($data['price']);
+        $car->setIsAvailable($data['isAvailable']);
+
+        //find the model by id
+        $model = $this->entityManager->getRepository(CarModel::class)->find($data['model']);
+        $car->setModel($model);
+
+        //save the car into the database
+        $this->entityManager->persist($car);
+        $this->entityManager->flush();
+
+
+        //json response
+        return $this->json(
+            $this->resultsForApi([$car]),
+            Response::HTTP_CREATED
+        );
+    }
+
     //helper method to format the API response
     private function resultsForApi(array $cars) : array
     {
@@ -63,6 +93,8 @@ class CarController extends AbstractController
         }, $cars);
          
     }
+
+
 
 
     //WEB ROUTES
