@@ -16,15 +16,30 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class CarController extends AbstractController
 {
     public function __construct(
-        private readonly CarRepository $carRepository
-
+        private readonly CarRepository $carRepository,
+        private readonly EntityManagerInterface $entityManager
     ){}
 
+    //get all cars
     #[Route('/cars', name: 'api_cars_list', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): JsonResponse
+    public function index(): JsonResponse
     {
         return $this->json($this->resultsForApi($this->carRepository->findAll()));
 
+    }
+
+    //get a specific car
+    #[Route('/car/{id}', methods: ['GET'])]
+    public function show(int $id): JsonResponse
+    {
+        $car = $this->entityManager->getRepository(Car::class)->find($id);
+
+        //check if car exists
+        if (!$car) {
+            return $this->json(['message' => 'Car not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($this->resultsForApi([$car]));
     }
 
     //helper method to format the API response
