@@ -50,15 +50,25 @@ class CarController extends AbstractController
         //convert json in an associative array
         $data = json_decode($request->getContent(), true);
 
+
+        //check if all fields are valid
+        if (!isset($data['year'], $data['price'], $data['isAvailable'], $data['model'])) {
+        return $this->json(['error' => 'Missing required fields'], Response::HTTP_BAD_REQUEST);
+        }
+
+        //find the model by id
+        $model = $this->entityManager->getRepository(CarModel::class)->find($data['model']);
+        if (!$model) {
+            return $this->json(['error' => 'Invalid model ID'], Response::HTTP_BAD_REQUEST);
+        }
+        
         //create a new car Instance
         $car = new Car();
         $car->setYear($data['year']);
         $car->setPrice($data['price']);
         $car->setIsAvailable($data['isAvailable']);
-
-        //find the model by id
-        $model = $this->entityManager->getRepository(CarModel::class)->find($data['model']);
         $car->setModel($model);
+        
 
         //save the car into the database
         $this->entityManager->persist($car);
@@ -108,7 +118,7 @@ class CarController extends AbstractController
 
 
 
-    
+
     //helper method to format the API response
     private function resultsForApi(array $cars) : array
     {
