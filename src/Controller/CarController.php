@@ -88,11 +88,23 @@ class CarController extends AbstractController
 
     $car = $this->entityManager->getRepository(Car::class)->find($id);
 
+    if (!$car) {
+        return $this->json(['error' => 'Car not found'], Response::HTTP_NOT_FOUND);
+    }
+
     $data = json_decode($request->getContent(), true);
 
-    $car->setYear($data['year']);
-    $car->setPrice($data['price']);
-    $car->setIsAvailable($data['isAvailable']);
+    if (isset($data['year'])) {
+        $car->setYear($data['year']);
+    }
+    
+    if (isset($data['price'])) {
+        $car->setPrice($data['price']);
+    }
+
+    if (isset($data['isAvailable'])) {
+        $car->setIsAvailable($data['isAvailable']);
+    }
 
     if (isset($data['model'])) {
         $model = $this->entityManager->getRepository(CarModel::class)->find($data['model']);
@@ -100,7 +112,7 @@ class CarController extends AbstractController
     }
 
     $this->entityManager->flush();
-    return $this->json($this->resultsForApi([$car])[0]);
+    return $this->json($this->resultsForApi([$car]));
     }
 
     #[Route('/car/{id}/delete', methods: ['DELETE'])]
@@ -115,9 +127,6 @@ class CarController extends AbstractController
         $this->entityManager->flush();
         return $this->json(['message' => 'Car deleted'], Response::HTTP_NO_CONTENT);
     }
-
-
-
 
     //helper method to format the API response
     private function resultsForApi(array $cars) : array
