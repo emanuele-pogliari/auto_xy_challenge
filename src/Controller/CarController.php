@@ -72,6 +72,27 @@ class CarController extends AbstractController
         );
     }
 
+    #[Route('/car/{id}/edit', methods:['PUT'])]
+    public function update(int $id, Request $request): JsonResponse
+    {
+
+    $car = $this->entityManager->getRepository(Car::class)->find($id);
+
+    $data = json_decode($request->getContent(), true);
+
+    $car->setYear($data['year']);
+    $car->setPrice($data['price']);
+    $car->setIsAvailable($data['isAvailable']);
+
+    if (isset($data['model'])) {
+        $model = $this->entityManager->getRepository(CarModel::class)->find($data['model']);
+        $car->setModel($model);
+    }
+
+    $this->entityManager->flush();
+    return $this->json($this->resultsForApi([$car])[0]);
+    }
+
     //helper method to format the API response
     private function resultsForApi(array $cars) : array
     {
