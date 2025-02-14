@@ -93,6 +93,22 @@ class CarController extends AbstractController
     return $this->json($this->resultsForApi([$car])[0]);
     }
 
+    #[Route('/car/{id}/delete', methods: ['DELETE'])]
+        public function delete(int $id): JsonResponse
+        {
+        $car = $this->entityManager->getRepository(Car::class)->find($id);
+
+        if (!$car) {
+            return $this->json(['message' => 'Car not found'], Response::HTTP_NOT_FOUND);
+        }
+        $this->entityManager->remove($car);
+        $this->entityManager->flush();
+        return $this->json(['message' => 'Car deleted'], Response::HTTP_NO_CONTENT);
+    }
+
+
+
+    
     //helper method to format the API response
     private function resultsForApi(array $cars) : array
     {
