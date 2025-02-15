@@ -42,8 +42,29 @@ class ApiCarController extends AbstractController
     }
     
     #[Route('/add', methods: ['POST'])]
-    public function addCar(): JsonResponse
+    public function addCar(Request $request): JsonResponse
     {
+        $data = json_decode($request->getContent(), true);
+
+        //find the model by id
+        $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
+
+        //create a new car Instance
+        $car = new Car();
+        $car->setYear($data['year']);
+        $car->setPrice($data['price']);
+        $car->setIsAvailable($data['isAvailable']);
+        $car->setModel($model);
+
+        //save the car into the database
+        $this->entityManager->persist($car);
+        $this->entityManager->flush();
+
+
+        //json response
+        return $this->json(
+            $this->resultsForApi([$car])
+        );
     }
 
     #[Route('car/{id}/update', methods: ['PUT', 'PATCH'])]

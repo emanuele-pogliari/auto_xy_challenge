@@ -8,6 +8,7 @@ use App\Entity\Brand;
 use App\Entity\Car;
 use App\Entity\CarModel;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\HttpFoundation\Request;
 
 final class ApiCarControllerTest extends WebTestCase
 {
@@ -69,5 +70,40 @@ final class ApiCarControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Type', 'application/json');
+    }
+
+    public function testAddCar(): void
+    {
+        $data = [
+                'year' => 2024,
+                'price' => 60000,
+                'model_id' => $this->entityManager
+                    ->getRepository(CarModel::class)
+                    ->findOneBy([])
+                    ->getId(),
+                'isAvailable' => true,
+            ];
+        
+            $this->client->request(
+                'POST',
+                '/api/add',
+                [],
+                [],
+                ['CONTENT_TYPE' => 'application/json'],
+                json_encode($data)
+            );
+        
+            self::assertResponseIsSuccessful();
+            self::assertResponseHeaderSame('Content-Type', 'application/json');
+        
+            // Verifica che l'auto sia stata effettivamente creata nel database
+            $car = $this->entityManager
+                ->getRepository(Car::class)
+                ->findOneBy(['year' => 2024]);
+        
+            self::assertNotNull($car);
+            self::assertEquals(2024, $car->getYear());
+            self::assertEquals(60000, $car->getPrice());
+            self::assertTrue($car->isAvailable());
     }
 }
