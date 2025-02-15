@@ -17,7 +17,7 @@ use App\Entity\Brand;
 use App\Repository\CarRepository;
 
 
-#[Route('/api',)]
+#[Route('/api', name:'_api')]
 class ApiCarController extends AbstractController
 {
 
@@ -33,9 +33,12 @@ class ApiCarController extends AbstractController
 
     }
 
-    #[Route('/car{id}', methods: ['GET'])]
+    #[Route('/car/{id}', methods: ['GET'])]
     public function show(int $id): JsonResponse
     {
+        $car = $this->entityManager->getRepository(Car::class)->find($id);
+        
+        return $this->json($this->resultsForApi([$car]));
     }
     
     #[Route('/add', methods: ['POST'])]
