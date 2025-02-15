@@ -28,7 +28,7 @@ class Car
     private bool $isAvailable = true;
 
     #[ORM\ManyToOne(targetEntity: CarModel::class, inversedBy: 'cars')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     #[Assert\NotNull(message: "A car must be associated with a valid model")]
     private CarModel $model;
 

@@ -48,25 +48,25 @@ class Brand
      */
     public function getModels(): Collection
     {
-        return $this->models;
+        return $this->carModels;
     }
 
-    public function addModel(CarModel $model): static
+    public function addModel(CarModel $carModel): static
     {
-        if (!$this->models->contains($model)) {
-            $this->models->add($model);
-            $model->setBrand($this);
+        if (!$this->carModels->contains($carModel)) {
+            $this->carModels->add($carModel);
+            $carModel->setBrand($this);
         }
 
         return $this;
     }
 
-    public function removeModel(CarModel $model): static
+    public function removeModel(CarModel $carModel): static
     {
-        if ($this->models->removeElement($model)) {
+        if ($this->carModels->removeElement($carModel)) {
             // set the owning side to null (unless already changed)
-            if ($model->getBrand() === $this) {
-                $model->setBrand(null);
+            if ($carModel->getBrand() === $this) {
+                $carModel->setBrand(null);
             }
         }
 
