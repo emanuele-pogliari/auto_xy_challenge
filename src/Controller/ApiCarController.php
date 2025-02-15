@@ -27,11 +27,33 @@ class ApiCarController extends AbstractController
     ){}
 
     #[Route('/cars', methods: ['GET'])]
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return $this->json($this->resultsForApi($this->carRepository->findAll()));
 
+        $brandName = $request->query->get('brand_name');
+        $modelName = $request->query->get('model_name');
+        $minPrice = $request->query->get('min_price');
+        $maxPrice = $request->query->get('max_price');
+        $isAvailable = $request->query->get('is_available');
+        $year = $request->query->get('year');
+        $minYear = $request->query->get('min_year');
+        $maxYear = $request->query->get('max_year');
+
+
+        $cars = $this->carRepository->findByFilters(
+            $brandName,
+            $modelName,
+            $minPrice,
+            $maxPrice,
+            $isAvailable,
+            $year,
+            $minYear,
+            $maxYear
+        );
+
+        return $this->json($this->resultsForApi($cars));
     }
+
 
     #[Route('/car/{id}', methods: ['GET'])]
     public function show(int $id): JsonResponse

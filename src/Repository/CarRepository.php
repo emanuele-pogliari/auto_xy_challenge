@@ -17,36 +17,73 @@ class CarRepository extends ServiceEntityRepository
         parent::__construct($registry, Car::class);
     }
 
-    public function findCarsByFilter(string $brand, string $model, string $status)
-    {
-        $queryBuilder = $this->createQueryBuilder('c')
-        ->leftJoin('c.model', 'm')
-        ->leftJoin('m.brand', 'b');
-
-        if ($brand) {
-            $queryBuilder->andWhere('b.name = :brand')
-                ->setParameter('brand', '%' . $brand . '%');
-        }
-        if ($model) {
-            $queryBuilder->andWhere('m.name LIKE :model')
-                ->setParameter('model', '%' . $model . '%');
-        }
-        if($status){
-            $queryBuilder->andWhere('c.isAvailable = :status')
-                ->setParameter('status', $status === 'available');
-        }
-        if ($minPrice) {
-            $queryBuilder->andWhere('c.price >= :minPrice')
-                ->setParameter('minPrice', $minPrice);
+    public function findByFilters(
+        ?string $brandName = null,
+        ?string $modelName = null,
+        ?int $minPrice = null,
+        ?int $maxPrice = null,
+        ?bool $isAvailable = null,
+        ?int $year = null,
+        ?int $minYear = null,
+        ?int $maxYear = null
+      ): array {
+          $qb = $this->createQueryBuilder('c');
+  
+          
+        if ($brandName) {
+            $qb
+                ->join('c.model', 'm')
+                ->join('m.brand', 'b')
+                ->andWhere('b.name =:brandName')
+                ->setParameter('brandName', $brandName);
         }
 
-        if ($maxPrice) {
-            $queryBuilder->andWhere('c.price <= :maxPrice')
-                ->setParameter('maxPrice', $maxPrice);
+        if ($modelName) {
+            $qb
+                ->join('c.model', 'm')
+                ->andWhere('m.name =:modelName')
+                ->setParameter('modelName', $modelName);
         }
 
-        return $queryBuilder->getQuery()->getResult();
-    }
+  
+          if ($minPrice) {
+              $qb
+                  ->andWhere('c.price >=:minPrice')
+                  ->setParameter('minPrice', $minPrice);
+          }
+  
+          if ($maxPrice) {
+              $qb
+                  ->andWhere('c.price <=:maxPrice')
+                  ->setParameter('maxPrice', $maxPrice);
+          }
+  
+          if ($isAvailable!== null) {
+              $qb
+                  ->andWhere('c.isAvailable =:isAvailable')
+                  ->setParameter('isAvailable', $isAvailable);
+          }
+
+          if ($year) {
+              $qb
+                  ->andWhere('c.year =:year')
+                  ->setParameter('year', $year);
+          }
+  
+          if ($minYear) {
+              $qb
+                  ->andWhere('c.year >=:minYear')
+                  ->setParameter('minYear', $minYear);
+          }
+  
+          if ($maxYear) {
+              $qb
+                  ->andWhere('c.year <=:maxYear')
+                  ->setParameter('maxYear', $maxYear);
+          }
+  
+          return $qb->getQuery()->getResult();
+      }
 
     //    /**
     //     * @return Car[] Returns an array of Car objects
