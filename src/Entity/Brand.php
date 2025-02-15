@@ -19,12 +19,11 @@ class Brand
     private string $name;
 
     #[ORM\OneToMany(targetEntity: CarModel::class, mappedBy: 'brand', cascade: ['persist', 'remove'])]
-    private Collection $models;
+    private Collection $carModels;
 
     public function __construct()
     {
         $this->carModels = new ArrayCollection();
-        $this->models = new ArrayCollection();
     }
 
     public function getId(): ?int
