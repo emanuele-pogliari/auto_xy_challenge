@@ -74,6 +74,13 @@ class ApiCarController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
+            $car->setYear($data['year']);
+
+            $car->setPrice($data['price']);
+
+            $car->setIsAvailable($data['isAvailable']);
+   
+
         $this->entityManager->flush();
         
         return $this->json($this->resultsForApi([$car]));
