@@ -11,7 +11,7 @@ class BrandTest extends TestCase
     private Brand $brand;
     private CarModel $carModel;
 
-    //setup for the tests
+    //setup for the test
     protected function setUp(): void
     {
         $this->brand = new Brand();
@@ -24,7 +24,7 @@ class BrandTest extends TestCase
 
     public function testAddCarModel()
     {
-        //Setup
+
         $this->brand->addModel($this->carModel);
         $this->assertCount(1, $this->brand->getModels());
 
@@ -32,8 +32,7 @@ class BrandTest extends TestCase
         $carModels = $this->brand->getModels();
 
 
-        if (!$carModels->isEmpty()) {
-            $this->assertSame($this->carModel, $carModels->first());
-        }
+        $this->assertSame($this->carModel, $carModels->first());
+
     }
 }
