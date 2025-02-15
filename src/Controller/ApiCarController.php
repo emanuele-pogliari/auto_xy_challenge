@@ -67,9 +67,16 @@ class ApiCarController extends AbstractController
         );
     }
 
-    #[Route('car/{id}/update', methods: ['PUT', 'PATCH'])]
+    #[Route('/car/{id}/update', methods: ['PUT'])]
     public function updateCar(int $id, Request $request): JsonResponse
     {
+        $car = $this->entityManager->getRepository(Car::class)->find($id);
+
+        $data = json_decode($request->getContent(), true);
+
+        $this->entityManager->flush();
+        
+        return $this->json($this->resultsForApi([$car]));
     }
 
     #[Route('/car/{id}/delete', methods: ['DELETE'])]

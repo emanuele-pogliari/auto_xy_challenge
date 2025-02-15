@@ -95,8 +95,7 @@ final class ApiCarControllerTest extends WebTestCase
         
             self::assertResponseIsSuccessful();
             self::assertResponseHeaderSame('Content-Type', 'application/json');
-        
-            // Verifica che l'auto sia stata effettivamente creata nel database
+    
             $car = $this->entityManager
                 ->getRepository(Car::class)
                 ->findOneBy(['year' => 2024]);
@@ -105,5 +104,36 @@ final class ApiCarControllerTest extends WebTestCase
             self::assertEquals(2024, $car->getYear());
             self::assertEquals(60000, $car->getPrice());
             self::assertTrue($car->isAvailable());
+    }
+
+    public function testUpdateCar(): void
+    {
+        $car = $this->entityManager
+            ->getRepository(Car::class)
+            ->findOneBy([]);
+            
+        $data = [
+                'id' => $car->getId(),
+                'year' => 2024,
+                'price' => 60000,
+                'isAvailable' => false,
+            ];
+        
+            $this->client->request(
+                'PUT',
+                '/api/car/'. $car->getId(). '/update',
+                [],
+                [],
+                ['CONTENT_TYPE' => 'application/json'],
+                json_encode($data)
+            );
+        
+            self::assertResponseIsSuccessful();
+            self::assertResponseHeaderSame('Content-Type', 'application/json');
+        
+            // Verifica che l'auto sia stata effettivamente modificata nel database
+            $car = $this->entityManager
+                ->getRepository(Car::class)
+                ->find($car->getId());
     }
 }
