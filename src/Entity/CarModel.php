@@ -13,7 +13,7 @@ class CarModel
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(lenght: 255)]
+    #[ORM\Column(length: 255)]
     private string $name;
 
     #[ORM\ManyToOne(targetEntity: Brand::class, inversedBy: 'carModels')]
