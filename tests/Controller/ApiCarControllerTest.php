@@ -130,10 +130,32 @@ final class ApiCarControllerTest extends WebTestCase
         
             self::assertResponseIsSuccessful();
             self::assertResponseHeaderSame('Content-Type', 'application/json');
-        
-            // Verifica che l'auto sia stata effettivamente modificata nel database
+
             $car = $this->entityManager
                 ->getRepository(Car::class)
                 ->find($car->getId());
+    }
+
+    public function testDeleteCar(): void
+    {
+        $car = $this->entityManager
+            ->getRepository(Car::class)
+            ->findOneBy([]);
+
+        $carId = $car->getId();
+            
+        $this->client->request(
+                'DELETE',
+                '/api/car/'. $carId . '/delete'
+            );
+        
+            self::assertResponseIsSuccessful();
+            self::assertResponseHeaderSame('Content-Type', 'application/json');
+        
+            $deletedCar = $this->entityManager
+            ->getRepository(Car::class)
+            ->find($carId);
+    
+            self::assertNull($deletedCar);
     }
 }

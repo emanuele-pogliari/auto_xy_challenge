@@ -82,6 +82,12 @@ class ApiCarController extends AbstractController
     #[Route('/car/{id}/delete', methods: ['DELETE'])]
     public function deleteCar(int $id): JsonResponse
     {
+        $car = $this->entityManager->getRepository(Car::class)->find($id);
+
+        $this->entityManager->remove($car);
+        $this->entityManager->flush();
+        
+        return $this->json(['message' => 'Car deleted'],);
     }
 
     private function resultsForApi(array $cars) : array
