@@ -97,7 +97,7 @@ class ApiCarController extends AbstractController
         //if model not found, return error response
         if (!$model) {
             return $this->json([
-                'error' => 'Model not found',
+                'message' => 'Model not found',
                 'model_id' => $data['model_id']
             ], 404);
         }
@@ -116,8 +116,9 @@ class ApiCarController extends AbstractController
 
         //json response
         return $this->json(
-            $this->resultsForApi([$car])
-        );
+            [ 'message' => 'Car added successfully to the catalog',
+            'data' => $this->resultsForApi([$car])
+            ], 200);
     }
 
     #[Route('/car/{id}/update', methods: ['PUT'])]
