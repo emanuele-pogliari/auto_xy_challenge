@@ -123,65 +123,85 @@ class ApiCarController extends AbstractController
             }
         }
 
-        //check if brand name or id exists
-        if (!isset($data['brand_id']) && !isset($data['brand_name'])) {
-            $missingParameters[] = 'brand_id or brand_name';
+        if (isset($data['brand_id']) && isset($data['brand_name'])) {
+            return $this->json(['error' => 'Only one of brand_id or brand_name should be provided'], 400);
+        } 
+    
+        elseif (!isset($data['brand_id']) &&!isset($data['brand_name'])) {
+            $missingParameters = 'brand_id or brand_name';
         }
 
-        //check if model name or id exists
-        if (!isset($data['model_id']) && !isset($data['model_name'])) {
-            $missingParameters[] = 'model_name or model_id';
+        // Check if either model_id or model_name is present, but not both
+        if (isset($data['model_id']) && isset($data['model_name'])) {
+            return $this->json(['error' => 'Only one of model_id or model_name should be provided'], 400);
+        }
+    
+        elseif (!isset($data['model_id']) &&!isset($data['model_name'])) {
+            $missingParameters = 'model_id or model_name';
         }
 
         //return the missing parameters
         if (!empty($missingParameters)) {
             return $this->json([
-                'error' => 'Missing required fields',
+                'error' => 'Missing required fields',      
                 'missing_fields' => $missingParameters
             ], 400);
         }
 
-        //if missing fields found, return error response
-        if (!empty($missingParameters)) {
-            return $this->json([
-                'error' => 'Missing required fields',
-                'missing_fields' => $missingParameters
-            ], 400);
+        //brand
+        if (isset($data['brand_id'])) {
+            $brand = $this->entityManager->getRepository(Brand::class)->find($data['brand_id']);
+
+            if (!$brand) {
+                return $this->json([
+                    'error' => 'Brand not found',
+                    'brand_id' => $data['brand_id']
+                ], 404);
+            }
+
+        } elseif (isset($data['brand_name'])) {
+            $brand = $this->entityManager->getRepository(Brand::class)
+                ->findOneBy(['name' => $data['brand_name']]);
+
+            if (!$brand) {
+                $brand = new Brand();
+                $brand->setName($data['brand_name']);
+                $this->entityManager->persist($brand);
+                $this->entityManager->flush();
+            }
+        } 
+
+        //car model
+        if (isset($data['model_id'])) {
+            $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
+
+            if (!$model) {
+                return $this->json([
+                    'error' => 'Model not found',
+                    'model_id' => $data['model_id']
+                ], 404);
+            }
+
+        } elseif (isset($data['model_name'])) {
+
+            if (!$brand) {  
+                return $this->json(['error' => 'Brand is required to create a new model'], 400);
+            }
+    
+            $model = $this->entityManager->getRepository(CarModel::class)
+                ->findOneBy([
+                    'name' => $data['model_name'],
+                    'brand' => $brand
+                ]);
+            if (!$model) {
+                $model = new CarModel();
+                $model->setName($data['model_name']);
+                $model->setBrand($brand);
+                $this->entityManager->persist($model);
+            }
         }
 
         $priceInCents = $priceTransformer->reverseTransform($data['price']);
-   
-        //find the model by name
-        $brand = $this->entityManager->getRepository(Brand::class)
-        ->findOneBy(['name' => $data['brand_name']]);
-
-        if (!$brand) {
-            $brand = new Brand();
-            $brand->setName($data['brand_name']);
-            $this->entityManager->persist($brand);
-        }
-
-        //if brand not found, return error response
-        // if (!$brand) {
-        //     return $this->json([
-        //         'message' => 'Model not found',
-        //         'model_id' => $data['model_id']
-        //     ], 404);
-        // }
-
-        $model = $this->entityManager->getRepository(CarModel::class)
-        ->findOneBy([
-            'name' => $data['model_name'],
-            'brand' => $brand
-        ]);
-
-
-        if (!$model) {
-            $model = new CarModel();
-            $model->setName($data['model_name']);
-            $model->setBrand($brand);
-            $this->entityManager->persist($model);
-        }
 
         try {
         //create a new car Instance
