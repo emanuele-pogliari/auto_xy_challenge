@@ -73,6 +73,13 @@ class ApiCarController extends AbstractController
         // total number of the pages
         $totalPages = ceil($cars->count() / $limit);
 
+        if($page > $totalPages){
+            return $this->json([
+                'error' => 'Invalid page number',
+            ], 400);
+        }
+
+
         $response = [
             'cars' => $this->resultsForApi($cars->getIterator()->getArrayCopy()),
             'currentPage' => $page,
