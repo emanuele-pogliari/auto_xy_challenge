@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    container_name: auto_xy_api
+    ports:
+      - "8080:8000"
+    volumes:
+      - .:/var/www/html
+    command: php -S 0.0.0.0:8000 -t public
+
+  db:
+    image: mysql:9.2.0
+    container_name: auto_xy_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
