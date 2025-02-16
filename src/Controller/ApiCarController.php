@@ -186,6 +186,18 @@ class ApiCarController extends AbstractController
                 'error' => 'JSON non valido'
             ], 400);
         }    
+        
+        $allowedFields = ['year', 'price', 'isAvailable'];
+    
+        $invalidFields = array_diff(array_keys($data), $allowedFields);
+        
+        if (!empty($invalidFields)) {
+            return $this->json([
+                'error' => 'Invalid fields provided',
+                'invalid_fields' => $invalidFields
+            ], 400);
+        }
+    
 
         try{
             if (isset($data['year'])) {
@@ -198,17 +210,6 @@ class ApiCarController extends AbstractController
             
             if (isset($data['isAvailable'])) {
                 $car->setIsAvailable($data['isAvailable']);
-            }
-            
-            if (isset($data['model_id'])) {
-                $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
-                //check if the model exists in the database
-                if (!$model) {
-                    return $this->json([
-                        'error' => 'Model not found'
-                    ], 404);
-                }
-                $car->setModel($model);
             }
 
         $this->entityManager->persist($car);
