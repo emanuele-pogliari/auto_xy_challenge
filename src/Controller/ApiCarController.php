@@ -94,6 +94,14 @@ class ApiCarController extends AbstractController
         //find the model by id
         $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
 
+        //if model not found, return error response
+        if (!$model) {
+            return $this->json([
+                'error' => 'Model not found',
+                'model_id' => $data['model_id']
+            ], 404);
+        }
+
         //create a new car Instance
         $car = new Car();
         $car->setYear($data['year']);
@@ -119,6 +127,7 @@ class ApiCarController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
+        $this->entityManager->persist($car);
         $this->entityManager->flush();
         
         return $this->json($this->resultsForApi([$car]));
