@@ -68,6 +68,11 @@ class ApiCarController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
+        //check if json is valid
+        if($data === null){
+            return $this->json(['message' => 'Invalid JSON'], 400);
+        }
+
         //find the model by id
         $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
 
