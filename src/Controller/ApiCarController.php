@@ -122,6 +122,10 @@ class ApiCarController extends AbstractController
             }
         }
 
+
+        $priceTransformer = new \App\Form\DataTransformer\PriceTransformer();
+        $priceInCents = $priceTransformer->reverseTransform($data['price']);
+
         //if missing fields found, return error response
         if(!empty($missingParameters)){
             return $this->json(['message' => 'Missing required fields: '. implode(', ', $missingParameters)], 400);
@@ -142,7 +146,7 @@ class ApiCarController extends AbstractController
         //create a new car Instance
         $car = new Car();
         $car->setYear($data['year']);
-        $car->setPrice($data['price']);
+        $car->setPrice($priceInCents);
         $car->setIsAvailable($data['isAvailable']);
         $car->setModel($model);
 
@@ -252,7 +256,7 @@ class ApiCarController extends AbstractController
                     'name' => $car->getModel()->getName(),
                 ],
                 'year' => $car->getYear(),
-                'price' => $car->getPrice(),
+                'price' => number_format($car->getPrice() / 100, 2, '.', '') . " Eur",
                 'isAvailable' => $car->isAvailable(),
             ];
         }, $cars);

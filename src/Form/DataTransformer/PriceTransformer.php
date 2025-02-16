@@ -10,19 +10,19 @@ class PriceTransformer implements DataTransformerInterface
 {
     public function transform($price): ?float
     {
-        if($value === null){
+        if($price === null){
             return null;
         }
 
-        return $value / 100;
+        return $price / 100;
     }
 
     public function reverseTransform($price): ?int
     {
-        if(!is_numeric($value)){
+        if(!is_numeric($price)){
             throw new TransformationFailedException("Invalid price number");
         }
-        return (int) round($value * 100);
+        return (int) round($price * 100);
     }
 
 }
