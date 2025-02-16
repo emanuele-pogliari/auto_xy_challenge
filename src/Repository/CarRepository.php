@@ -28,7 +28,7 @@ class CarRepository extends ServiceEntityRepository
         ?int $minYear = null,
         ?int $maxYear = null,
         int $page = 1,
-        int $limit = 5
+        int $limit = 10
 
         //will return a Paginator instance with cars filtered (if filters are applied)
       ): Paginator {

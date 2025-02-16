@@ -31,8 +31,21 @@ class ApiCarController extends AbstractController
     public function index(Request $request): JsonResponse
     {
 
+        //validation for pagination parameters
         $page = $request->query->get('page', 1);
-        $limit = $request->query->get('limit', 5);
+        $limit = $request->query->get('limit', 10);
+
+        if($page < 1){
+            return $this->json([
+                'error' => 'Invalid page number',
+            ], 400);
+        }
+
+        if($limit < 1 || $limit > 30){
+            return $this->json([
+                'error' => 'Invalid limit number',
+            ], 400);
+        }
 
         $brandName = $request->query->get('brand_name');
         $modelName = $request->query->get('model_name');
