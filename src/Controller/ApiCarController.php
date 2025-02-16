@@ -102,6 +102,7 @@ class ApiCarController extends AbstractController
             ], 404);
         }
 
+        try {
         //create a new car Instance
         $car = new Car();
         $car->setYear($data['year']);
@@ -115,10 +116,16 @@ class ApiCarController extends AbstractController
 
 
         //json response
-        return $this->json(
-            [ 'message' => 'Car added successfully to the catalog',
+        return $this->json([ 
+            'message' => 'Car added successfully to the catalog',
             'data' => $this->resultsForApi([$car])
             ], 200);
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => 'Errore durante il salvataggio',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     #[Route('/car/{id}/update', methods: ['PUT'])]
@@ -142,7 +149,10 @@ class ApiCarController extends AbstractController
         $this->entityManager->remove($car);
         $this->entityManager->flush();
         
-        return $this->json(['message' => 'Car deleted'],);
+        return $this->json([
+            'message' => 'Car deleted',
+            'data' => $this->resultsForApi([$car])
+        ],);
     }
 
     private function resultsForApi(array $cars) : array
