@@ -136,7 +136,7 @@ class ApiCarController extends AbstractController
         if (!$car) {
             return $this->json([
                 'error' => 'Car not found',
-            ], Response::HTTP_NOT_FOUND);
+            ], 404);
         }
 
         $data = json_decode($request->getContent(), true);
@@ -144,8 +144,32 @@ class ApiCarController extends AbstractController
         if ($data === null) {
             return $this->json([
                 'error' => 'JSON non valido'
-            ], Response::HTTP_BAD_REQUEST);
+            ], 400);
         }    
+
+        try{
+            if (isset($data['year'])) {
+                $car->setYear($data['year']);
+            }
+            
+            if (isset($data['price'])) {
+                $car->setPrice($data['price']);
+            }
+            
+            if (isset($data['isAvailable'])) {
+                $car->setIsAvailable($data['isAvailable']);
+            }
+            
+            if (isset($data['model_id'])) {
+                $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
+                //check if the model exists in the database
+                if (!$model) {
+                    return $this->json([
+                        'error' => 'Model not found'
+                    ], 404);
+                }
+                $car->setModel($model);
+            }
 
         $this->entityManager->persist($car);
         $this->entityManager->flush();
@@ -154,6 +178,14 @@ class ApiCarController extends AbstractController
             'message' => 'Car modified successfully',
             'data' => $this->resultsForApi([$car])
             ], 200);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => 'An error occurred',
+               'message' => $e->getMessage()
+            ], 500);
+        }
+    
     }
 
     #[Route('/car/{id}/delete', methods: ['DELETE'])]
