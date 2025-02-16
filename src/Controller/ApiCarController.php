@@ -11,6 +11,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
+use App\Form\DataTransformer\PriceTransformer;
+
 
 use App\Entity\Car;
 use App\Entity\CarModel;
@@ -100,7 +102,7 @@ class ApiCarController extends AbstractController
     }
     
     #[Route('/add', methods: ['POST'])]
-    public function addCar(Request $request): JsonResponse
+    public function addCar(Request $request, PriceTransformer $priceTransformer): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -122,8 +124,6 @@ class ApiCarController extends AbstractController
             }
         }
 
-
-        $priceTransformer = new \App\Form\DataTransformer\PriceTransformer();
         $priceInCents = $priceTransformer->reverseTransform($data['price']);
 
         //if missing fields found, return error response
@@ -169,7 +169,7 @@ class ApiCarController extends AbstractController
     }
 
     #[Route('/car/{id}/update', methods: ['PUT'])]
-    public function updateCar(int $id, Request $request): JsonResponse
+    public function updateCar(int $id, Request $request, PriceTransformer $priceTransformer): JsonResponse
     {
         $car = $this->entityManager->getRepository(Car::class)->find($id);
 
@@ -193,7 +193,7 @@ class ApiCarController extends AbstractController
             }
             
             if (isset($data['price'])) {
-                $car->setPrice($data['price']);
+                $car->setPrice($priceTransformer->reverseTransform($data['price']));
             }
             
             if (isset($data['isAvailable'])) {
