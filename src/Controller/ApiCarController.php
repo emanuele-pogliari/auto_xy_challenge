@@ -111,8 +111,7 @@ class ApiCarController extends AbstractController
             return $this->json(['message' => 'Invalid JSON'], 400);
         }
 
-
-        $requiredFields = ['model_id', 'year', 'price', 'isAvailable'];
+        $requiredFields = ['year', 'price', 'isAvailable'];
 
         //array for keeping tracks of missing fields
         $missingParameters = [];
@@ -124,22 +123,64 @@ class ApiCarController extends AbstractController
             }
         }
 
-        $priceInCents = $priceTransformer->reverseTransform($data['price']);
-
-        //if missing fields found, return error response
-        if(!empty($missingParameters)){
-            return $this->json(['message' => 'Missing required fields: '. implode(', ', $missingParameters)], 400);
+        //check if brand name or id exists
+        if (!isset($data['brand_id']) && !isset($data['brand_name'])) {
+            $missingParameters[] = 'brand_id or brand_name';
         }
 
-        //find the model by id
-        $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
+        //check if model name or id exists
+        if (!isset($data['model_id']) && !isset($data['model_name'])) {
+            $missingParameters[] = 'model_name or model_id';
+        }
 
-        //if model not found, return error response
-        if (!$model) {
+        //return the missing parameters
+        if (!empty($missingParameters)) {
             return $this->json([
-                'message' => 'Model not found',
-                'model_id' => $data['model_id']
-            ], 404);
+                'error' => 'Missing required fields',
+                'missing_fields' => $missingParameters
+            ], 400);
+        }
+
+        //if missing fields found, return error response
+        if (!empty($missingParameters)) {
+            return $this->json([
+                'error' => 'Missing required fields',
+                'missing_fields' => $missingParameters
+            ], 400);
+        }
+
+        $priceInCents = $priceTransformer->reverseTransform($data['price']);
+   
+        //find the model by name
+        $brand = $this->entityManager->getRepository(Brand::class)
+        ->findOneBy(['name' => $data['brand_name']]);
+
+        if (!$brand) {
+            $brand = new Brand();
+            $brand->setName($data['brand_name']);
+            $this->entityManager->persist($brand);
+        }
+
+        //if brand not found, return error response
+        // if (!$brand) {
+        //     return $this->json([
+        //         'message' => 'Model not found',
+        //         'model_id' => $data['model_id']
+        //     ], 404);
+        // }
+
+        $model = $this->entityManager->getRepository(CarModel::class)
+        ->findOneBy([
+            'name' => $data['model_name'],
+            'brand' => $brand
+        ]);
+
+
+        if (!$model) {
+            $model = new CarModel();
+            $model->setName($data['model_name']);
+            $model->setBrand($brand);
+            $this->entityManager->persist($model);
         }
 
         try {
@@ -162,7 +203,7 @@ class ApiCarController extends AbstractController
             ], 200);
         } catch (\Exception $e) {
             return $this->json([
-                'error' => 'Errore durante il salvataggio',
+                'error' => 'An Error Occured',
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -186,8 +227,8 @@ class ApiCarController extends AbstractController
                 'error' => 'JSON non valido'
             ], 400);
         }    
-        
-        $allowedFields = ['year', 'price', 'isAvailable'];
+
+        $allowedFields = ['model_name', 'brand_name', 'year', 'price', 'isAvailable'];
     
         $invalidFields = array_diff(array_keys($data), $allowedFields);
         
@@ -200,6 +241,7 @@ class ApiCarController extends AbstractController
     
 
         try{
+            
             if (isset($data['year'])) {
                 $car->setYear($data['year']);
             }
