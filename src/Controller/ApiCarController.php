@@ -73,6 +73,24 @@ class ApiCarController extends AbstractController
             return $this->json(['message' => 'Invalid JSON'], 400);
         }
 
+
+        $requiredFields = ['model_id', 'year', 'price', 'isAvailable'];
+
+        //array for keeping tracks of missing fields
+        $missingParameters = [];
+
+        //check if all required fields are present in the request data
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])){
+                $missingParameters[] = $field;
+            }
+        }
+
+        //if missing fields found, return error response
+        if(!empty($missingParameters)){
+            return $this->json(['message' => 'Missing required fields: '. implode(', ', $missingParameters)], 400);
+        }
+
         //find the model by id
         $model = $this->entityManager->getRepository(CarModel::class)->find($data['model_id']);
 
