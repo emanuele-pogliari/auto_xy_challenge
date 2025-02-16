@@ -6,6 +6,7 @@ use App\Entity\Car;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @extends ServiceEntityRepository<Car>
@@ -25,8 +26,12 @@ class CarRepository extends ServiceEntityRepository
         ?bool $isAvailable = null,
         ?int $year = null,
         ?int $minYear = null,
-        ?int $maxYear = null
-      ): array {
+        ?int $maxYear = null,
+        int $page = 1,
+        int $limit = 5
+
+        //will return a Paginator instance with cars filtered (if filters are applied)
+      ): Paginator {
           $qb = $this->createQueryBuilder('c');
   
           
@@ -81,8 +86,11 @@ class CarRepository extends ServiceEntityRepository
                   ->andWhere('c.year <=:maxYear')
                   ->setParameter('maxYear', $maxYear);
           }
+
+          $qb->setFirstResult(($page - 1) * $limit)
+          ->setMaxResults($limit);
   
-          return $qb->getQuery()->getResult();
+          return new Paginator($qb->getQuery());
       }
 
     //    /**

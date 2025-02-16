@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 use App\Entity\Car;
@@ -30,6 +31,9 @@ class ApiCarController extends AbstractController
     public function index(Request $request): JsonResponse
     {
 
+        $page = $request->query->get('page', 1);
+        $limit = $request->query->get('limit', 5);
+
         $brandName = $request->query->get('brand_name');
         $modelName = $request->query->get('model_name');
         $minPrice = $request->query->get('min_price');
@@ -48,10 +52,22 @@ class ApiCarController extends AbstractController
             $isAvailable,
             $year,
             $minYear,
-            $maxYear
+            $maxYear,
+            $page,
+            $limit
         );
 
-        return $this->json($this->resultsForApi($cars));
+        // total number of the pages
+        $totalPages = ceil($cars->count() / $limit);
+
+        $response = [
+            'cars' => $this->resultsForApi($cars->getIterator()->getArrayCopy()),
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'limit' => $limit,
+        ];
+
+        return $this->json($response);
     }
 
 
