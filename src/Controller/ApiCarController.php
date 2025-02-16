@@ -133,12 +133,27 @@ class ApiCarController extends AbstractController
     {
         $car = $this->entityManager->getRepository(Car::class)->find($id);
 
+        if (!$car) {
+            return $this->json([
+                'error' => 'Car not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $data = json_decode($request->getContent(), true);
+
+        if ($data === null) {
+            return $this->json([
+                'error' => 'JSON non valido'
+            ], Response::HTTP_BAD_REQUEST);
+        }    
 
         $this->entityManager->persist($car);
         $this->entityManager->flush();
         
-        return $this->json($this->resultsForApi([$car]));
+        return $this->json([ 
+            'message' => 'Car modified successfully',
+            'data' => $this->resultsForApi([$car])
+            ], 200);
     }
 
     #[Route('/car/{id}/delete', methods: ['DELETE'])]
