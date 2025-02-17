@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -23,6 +24,120 @@ use App\Repository\CarRepository;
 #[Route('/api', name:'_api')]
 class ApiCarController extends AbstractController
 {
+    #[OA\Get(
+        path: '/api/cars',
+        summary: 'Get list of cars with filters',
+        description: 'Retrieves a paginated list of cars with optional filtering'
+    )]
+    #[OA\Parameter(
+        name: 'page',
+        in: 'query',
+        description: 'Page number',
+        schema: new OA\Schema(type: 'integer', default: 1, minimum: 1)
+    )]
+    #[OA\Parameter(
+        name: 'limit',
+        in: 'query',
+        description: 'Number of items per page',
+        schema: new OA\Schema(type: 'integer', default: 10, minimum: 1, maximum: 50)
+    )]
+    #[OA\Parameter(
+        name: 'brand_name',
+        in: 'query',
+        description: 'Filter by brand name',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'model_name',
+        in: 'query',
+        description: 'Filter by model name',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'min_price',
+        in: 'query',
+        description: 'Minimum price',
+        schema: new OA\Schema(type: 'number', minimum: 0)
+    )]
+    #[OA\Parameter(
+        name: 'max_price',
+        in: 'query',
+        description: 'Maximum price',
+        schema: new OA\Schema(type: 'number', minimum: 0)
+    )]
+    #[OA\Parameter(
+        name: 'year',
+        in: 'query',
+        description: 'Filter by specific year',
+        schema: new OA\Schema(type: 'integer', minimum: 1900, maximum: 2025)
+    )]
+    #[OA\Parameter(
+        name: 'min_year',
+        in: 'query',
+        description: 'Minimum year',
+        schema: new OA\Schema(type: 'integer', minimum: 1900)
+    )]
+    #[OA\Parameter(
+        name: 'max_year',
+        in: 'query',
+        description: 'Maximum year',
+        schema: new OA\Schema(type: 'integer', maximum: 2025)
+    )]
+    #[OA\Parameter(
+        name: 'is_available',
+        in: 'query',
+        description: 'Filter by availability',
+        schema: new OA\Schema(type: 'boolean')
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the list of cars',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'data', type: 'array', items: new OA\Items(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer'),
+                        new OA\Property(property: 'brand', type: 'object', properties: [
+                            new OA\Property(property: 'id', type: 'integer'),
+                            new OA\Property(property: 'name', type: 'string')
+                        ]),
+                        new OA\Property(property: 'model', type: 'object', properties: [
+                            new OA\Property(property: 'id', type: 'integer'),
+                            new OA\Property(property: 'name', type: 'string')
+                        ]),
+                        new OA\Property(property: 'year', type: 'integer'),
+                        new OA\Property(property: 'price', type: 'string'),
+                        new OA\Property(property: 'isAvailable', type: 'boolean')
+                    ]
+                )),
+                new OA\Property(property: 'metadata', type: 'object', properties: [
+                    new OA\Property(property: 'current_page', type: 'integer'),
+                    new OA\Property(property: 'total_pages', type: 'integer'),
+                    new OA\Property(property: 'total_items', type: 'integer'),
+                    new OA\Property(property: 'items_per_page', type: 'integer')
+                ])
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Invalid parameters provided',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error', type: 'string'),
+                new OA\Property(property: 'message', type: 'string')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'No cars found',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message', type: 'string')
+            ]
+        )
+    )]
 
     public function __construct(
         private CarRepository $carRepository,
@@ -96,6 +211,8 @@ class ApiCarController extends AbstractController
         ];
 
         return $this->json($response);
+
+        
     }
 
 
@@ -106,6 +223,88 @@ class ApiCarController extends AbstractController
         
         return $this->json($this->resultsForApi([$car]));
     }
+
+    #[OA\Post(
+        path: '/api/add',
+        summary: 'Create a new car',
+        description: 'Creates a new car with the provided details'
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'application/json',
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(property: 'year', type: 'integer', example: 2023),
+                    new OA\Property(property: 'price', type: 'number', example: 50000),
+                    new OA\Property(property: 'isAvailable', type: 'boolean', example: true)
+                ],
+                oneOf: [
+                    new OA\Schema(
+                        properties: [
+                            new OA\Property(property: 'brand_id', type: 'integer', example: 1),
+                            new OA\Property(property: 'model_id', type: 'integer', example: 1)
+                        ],
+                        required: ['brand_id', 'model_id']
+                    ),
+                    new OA\Schema(
+                        properties: [
+                            new OA\Property(property: 'brand_name', type: 'string', example: 'BMW'),
+                            new OA\Property(property: 'model_name', type: 'string', example: 'X5')
+                        ],
+                        required: ['brand_name', 'model_name']
+                    )
+                ]
+            ),
+            examples: [
+                new OA\Examples(
+                    example: 'with_ids',
+                    summary: 'Using IDs',
+                    description: "Using IDs requires existing brands and models in the database",
+                    value: [
+                        'year' => 2023,
+                        'price' => 50000,
+                        'isAvailable' => true,
+                        'brand_id' => 1,
+                        'model_id' => 1
+                    ]
+                ),
+                new OA\Examples(
+                    example: 'with_names',
+                    summary: 'Using Names',
+                    description: "Using names allows automatic creation of new brands and models if they don't exist in the database",
+                    value: [
+                        'year' => 2023,
+                        'price' => 50000,
+                        'isAvailable' => true,
+                        'brand_name' => 'BMW',
+                        'model_name' => 'X5'
+                    ]
+                )
+            ]
+        )
+    )]
+
+    #[OA\Response(
+        response: 201,
+        description: 'Car created successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'id', type: 'integer'),
+                new OA\Property(property: 'message', type: 'string')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Invalid data provided',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'error', type: 'string'),
+                new OA\Property(property: 'missing_fields', type: 'array', items: new OA\Items(type: 'string'))
+            ]
+        )
+    )]
     
     #[Route('/add', methods: ['POST'])]
     public function addCar(Request $request, PriceTransformer $priceTransformer): JsonResponse
