@@ -4,7 +4,7 @@ This project provides a RESTful API for managing a car catalog, built with Symfo
 
 ## Prerequisites
 
-Docker e Docker Compose installati sul sistema.
+- Docker and Docker Compose installed on your system.
 
 ## Installation
 
@@ -15,7 +15,7 @@ git clone [https://github.com/your-username/auto_xy_challenge.git]
 cd auto_xy_challenge
 ```
 
-2. Configurare le variabili d'ambiente
+2. Configure environment variables:
 
 Create a .env.local file from the existing .env example and modify the DATABASE_URL to point to the MySQL container:
 
@@ -82,3 +82,5 @@ Invoke-WebRequest -Uri "http://localhost:8080/api/cars" -Method Get -Headers @{A
 Or you can use Postman or another API client.
 
 ## Testing
+
+Wip...
