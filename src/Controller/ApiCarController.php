@@ -72,6 +72,12 @@ class ApiCarController extends AbstractController
             $limit
         );
 
+        if ($cars->count() === 0) {
+            return $this->json([
+                'message' => 'No cars found matching the criteria'
+            ], 404);
+        }
+
         // total number of the pages
         $totalPages = ceil($cars->count() / $limit);
 
