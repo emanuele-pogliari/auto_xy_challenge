@@ -648,6 +648,75 @@ class ApiCarController extends AbstractController
     
     }
 
+    #[OA\Delete(
+        path: '/api/car/{id}/delete',
+        summary: 'Delete a car',
+        description: 'Removes a car from the database'
+    )]
+    #[OA\Parameter(
+        name: 'id',
+        in: 'path',
+        required: true,
+        description: 'ID of the car to delete',
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Car successfully deleted',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'message',
+                    type: 'string',
+                    example: 'Car deleted'
+                ),
+                new OA\Property(
+                    property: 'data',
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'brand', type: 'string', example: 'BMW'),
+                        new OA\Property(property: 'model', type: 'string', example: 'X5'),
+                        new OA\Property(property: 'year', type: 'integer', example: 2023),
+                        new OA\Property(property: 'price', type: 'string', example: '50000.00 Eur'),
+                        new OA\Property(property: 'isAvailable', type: 'boolean', example: true)
+                    ]
+                )
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Car not found',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'error',
+                    type: 'string',
+                    example: 'Car not found'
+                )
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Server error',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'error',
+                    type: 'string',
+                    example: 'An error occurred'
+                ),
+                new OA\Property(
+                    property: 'message',
+                    type: 'string',
+                    example: 'Error message details'
+                )
+            ]
+        )
+    )]
+
     #[Route('/car/{id}/delete', methods: ['DELETE'])]
     public function deleteCar(int $id): JsonResponse
     {
