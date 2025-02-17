@@ -24,7 +24,8 @@ RUN composer install --no-scripts --no-autoloader
 
 # Imposta i permessi corretti
 RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 775 /var/www/html/var
+
+RUN mkdir -p /var/www/html/var && chmod -R 775 /var/www/html/var
 
 # Esponi la porta per Symfony
 EXPOSE 8000
