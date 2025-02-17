@@ -24,6 +24,13 @@ use App\Repository\CarRepository;
 #[Route('/api', name:'_api')]
 class ApiCarController extends AbstractController
 {
+    public function __construct(
+        private CarRepository $carRepository,
+        private EntityManagerInterface $entityManager,
+    ){}
+
+    #[Route('/cars', methods: ['GET'])]
+    #[OA\Tag(name: "Cars")]
     #[OA\Get(
         path: '/api/cars',
         summary: 'Get list of cars with filters',
@@ -138,13 +145,6 @@ class ApiCarController extends AbstractController
             ]
         )
     )]
-
-    public function __construct(
-        private CarRepository $carRepository,
-        private EntityManagerInterface $entityManager,
-    ){}
-
-    #[Route('/cars', methods: ['GET'])]
     public function index(Request $request): JsonResponse
     {
 
@@ -217,6 +217,58 @@ class ApiCarController extends AbstractController
 
 
     #[Route('/car/{id}', methods: ['GET'])]
+    #[OA\Tag(name: 'Cars')]
+    #[OA\Parameter(
+    name: 'id',
+    description: 'Car ID',
+    in: 'path',
+    required: true,
+    schema: new OA\Schema(type: 'integer')
+)]
+#[OA\Response(
+    response: 200,
+    description: 'Returns car details',
+    content: new OA\JsonContent(
+        properties: [
+            new OA\Property(
+                property: 'data',
+                type: 'array',
+                items: new OA\Items(properties: [
+                    new OA\Property(property: 'id', type: 'integer'),
+                    new OA\Property(
+                        property: 'brand',
+                        type: 'object',
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer'),
+                            new OA\Property(property: 'name', type: 'string')
+                        ]
+                    ),
+                    new OA\Property(
+                        property: 'model',
+                        type: 'object',
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer'),
+                            new OA\Property(property: 'name', type: 'string')
+                        ]
+                    ),
+                    new OA\Property(property: 'year', type: 'integer'),
+                    new OA\Property(property: 'price', type: 'string', example: "50000.00 Eur"),
+                    new OA\Property(property: 'isAvailable', type: 'boolean')
+                ])
+            )
+        ]
+    )
+)]
+#[OA\Response(
+    response: 404,
+    description: 'Car not found',
+    content: new OA\JsonContent(
+        properties: [
+            new OA\Property(property: 'error', type: 'string', example: 'Car not found')
+        ]
+    )
+)]
+
     public function show(int $id): JsonResponse
     {
         $car = $this->entityManager->getRepository(Car::class)->find($id);
@@ -224,6 +276,11 @@ class ApiCarController extends AbstractController
         return $this->json($this->resultsForApi([$car]));
     }
 
+    
+    
+    #[Route('/add', methods: ['POST'])]
+
+    #[OA\Tag(name: "Cars")]
     #[OA\Post(
         path: '/api/add',
         summary: 'Create a new car',
@@ -305,8 +362,7 @@ class ApiCarController extends AbstractController
             ]
         )
     )]
-    
-    #[Route('/add', methods: ['POST'])]
+
     public function addCar(Request $request, PriceTransformer $priceTransformer): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -453,6 +509,10 @@ class ApiCarController extends AbstractController
         }
     }
 
+
+
+    #[Route('/car/{id}/update', methods: ['PUT'])]
+    #[OA\Tag(name: 'Cars')]
     #[OA\Put(
         path: '/api/car/{id}/update',
         summary: 'Update an existing car',
@@ -569,7 +629,6 @@ class ApiCarController extends AbstractController
         )
     )]
 
-    #[Route('/car/{id}/update', methods: ['PUT'])]
     public function updateCar(int $id, Request $request, PriceTransformer $priceTransformer): JsonResponse
     {
         $car = $this->entityManager->getRepository(Car::class)->find($id);
@@ -654,76 +713,78 @@ class ApiCarController extends AbstractController
     
     }
 
-    #[OA\Delete(
-        path: '/api/car/{id}/delete',
-        summary: 'Delete a car',
-        description: 'Removes a car from the database'
-    )]
-    #[OA\Parameter(
-        name: 'id',
-        in: 'path',
-        required: true,
-        description: 'ID of the car to delete',
-        schema: new OA\Schema(type: 'integer')
-    )]
-    #[OA\Response(
-        response: 200,
-        description: 'Car successfully deleted',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'message',
-                    type: 'string',
-                    example: 'Car deleted'
-                ),
-                new OA\Property(
-                    property: 'data',
-                    type: 'object',
-                    properties: [
-                        new OA\Property(property: 'id', type: 'integer', example: 1),
-                        new OA\Property(property: 'brand', type: 'string', example: 'BMW'),
-                        new OA\Property(property: 'model', type: 'string', example: 'X5'),
-                        new OA\Property(property: 'year', type: 'integer', example: 2023),
-                        new OA\Property(property: 'price', type: 'string', example: '50000.00 Eur'),
-                        new OA\Property(property: 'isAvailable', type: 'boolean', example: true)
-                    ]
-                )
-            ]
-        )
-    )]
-    #[OA\Response(
-        response: 404,
-        description: 'Car not found',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'error',
-                    type: 'string',
-                    example: 'Car not found'
-                )
-            ]
-        )
-    )]
-    #[OA\Response(
-        response: 500,
-        description: 'Server error',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'error',
-                    type: 'string',
-                    example: 'An error occurred'
-                ),
-                new OA\Property(
-                    property: 'message',
-                    type: 'string',
-                    example: 'Error message details'
-                )
-            ]
-        )
-    )]
+    
 
     #[Route('/car/{id}/delete', methods: ['DELETE'])]
+    #[OA\Tag(name: "Cars")]
+        #[OA\Delete(
+            path: '/api/car/{id}/delete',
+            summary: 'Delete a car',
+            description: 'Removes a car from the database'
+        )]
+        #[OA\Parameter(
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'ID of the car to delete',
+            schema: new OA\Schema(type: 'integer')
+        )]
+        #[OA\Response(
+            response: 200,
+            description: 'Car successfully deleted',
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'message',
+                        type: 'string',
+                        example: 'Car deleted'
+                    ),
+                    new OA\Property(
+                        property: 'data',
+                        type: 'object',
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer', example: 1),
+                            new OA\Property(property: 'brand', type: 'string', example: 'BMW'),
+                            new OA\Property(property: 'model', type: 'string', example: 'X5'),
+                            new OA\Property(property: 'year', type: 'integer', example: 2023),
+                            new OA\Property(property: 'price', type: 'string', example: '50000.00 Eur'),
+                            new OA\Property(property: 'isAvailable', type: 'boolean', example: true)
+                        ]
+                    )
+                ]
+            )
+        )]
+        #[OA\Response(
+            response: 404,
+            description: 'Car not found',
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'error',
+                        type: 'string',
+                        example: 'Car not found'
+                    )
+                ]
+            )
+        )]
+        #[OA\Response(
+            response: 500,
+            description: 'Server error',
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'error',
+                        type: 'string',
+                        example: 'An error occurred'
+                    ),
+                    new OA\Property(
+                        property: 'message',
+                        type: 'string',
+                        example: 'Error message details'
+                    )
+                ]
+            )
+        )]
     public function deleteCar(int $id): JsonResponse
     {
         if ($id <= 0) {
@@ -755,6 +816,8 @@ class ApiCarController extends AbstractController
                 'message' => $e->getMessage()
             ], 500);
         }
+
+        
     }
 
     private function resultsForApi(array $cars) : array
