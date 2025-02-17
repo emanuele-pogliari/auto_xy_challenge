@@ -129,6 +129,25 @@ class ApiCarController extends AbstractController
             }
         }
 
+        if (isset($data['year'])) {
+            if ($data['year'] < 1900 || $data['year'] > date('Y') + 1) {
+                return $this->json([
+                    'error' => 'Invalid year',
+                    'message' => 'Year must be between 1900 and ' . (date('Y') + 1)
+                ], 400);
+            }
+        }
+
+        if (isset($data['price'])) {
+            if ($data['price'] < 0) {
+                return $this->json([
+                    'error' => 'Invalid price',
+                    'message' => 'Price cannot be negative'
+                ], 400);
+            }
+        }
+
+        // Check if either brand_id or brand_name is present, but not both
         if (isset($data['brand_id']) && isset($data['brand_name'])) {
             return $this->json(['error' => 'Only one of brand_id or brand_name should be provided'], 400);
         } 
@@ -250,7 +269,7 @@ class ApiCarController extends AbstractController
 
         if ($data === null) {
             return $this->json([
-                'error' => 'JSON non valido'
+                'error' => 'JSON not valid'
             ], 400);
         }    
 
@@ -264,7 +283,24 @@ class ApiCarController extends AbstractController
                 'invalid_fields' => $invalidFields
             ], 400);
         }
-    
+
+        if (isset($data['year'])) {
+            if ($data['year'] < 1900 || $data['year'] > date('Y') + 1) {
+                return $this->json([
+                    'error' => 'Invalid year',
+                    'message' => 'Year must be between 1900 and ' . (date('Y') + 1)
+                ], 400);
+            }
+        }
+
+        if (isset($data['price'])) {
+            if ($data['price'] < 0) {
+                return $this->json([
+                    'error' => 'Invalid price',
+                    'message' => 'Price cannot be negative'
+                ], 400);
+            }
+        }
 
         try{
             
