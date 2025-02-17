@@ -1,0 +1,25 @@
+nelmio_api_doc:
+  documentation:
+    info:
+      title: Cars API
+      description: API for managing cars inventory
+      version: 1.0.0
+    components:
+      schemas:
+        Car:
+          type: object
+          properties:
+            id: { type: integer }
+            brand_name: { type: string }
+            model_name: { type: string }
+            year: { type: integer }
+            price: { type: number }
+            isAvailable: { type: boolean }
+      # securitySchemes:
+      #   Bearer:
+      #     type: http
+      #     scheme: bearer
+      #     bearerFormat: JWT
+  areas:
+    path_patterns:
+      - ^/api(?!/doc$)
