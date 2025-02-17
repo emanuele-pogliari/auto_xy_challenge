@@ -574,6 +574,12 @@ class ApiCarController extends AbstractController
     {
         $car = $this->entityManager->getRepository(Car::class)->find($id);
 
+        if ($id <= 0) {
+            return $this->json([
+                'error' => 'Invalid ID format'
+            ], 400);
+        }
+
         if (!$car) {
             return $this->json([
                 'error' => 'Car not found',
@@ -720,15 +726,35 @@ class ApiCarController extends AbstractController
     #[Route('/car/{id}/delete', methods: ['DELETE'])]
     public function deleteCar(int $id): JsonResponse
     {
+        if ($id <= 0) {
+            return $this->json([
+                'error' => 'Invalid ID format'
+            ], 400);
+        }
+
         $car = $this->entityManager->getRepository(Car::class)->find($id);
 
-        $this->entityManager->remove($car);
-        $this->entityManager->flush();
+        if (!$car) {
+            return $this->json([
+                'error' => 'Car not found'
+            ], 404);
+        }
+
+        try{
+
+            $this->entityManager->remove($car);
+            $this->entityManager->flush();
         
-        return $this->json([
-            'message' => 'Car deleted',
-            'data' => $this->resultsForApi([$car])
-        ],);
+            return $this->json([
+                'message' => 'Car deleted',
+                'data' => $this->resultsForApi([$car])
+            ],);
+        }  catch (\Exception $e) {
+            return $this->json([
+                'error' => 'An error occurred',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     private function resultsForApi(array $cars) : array
