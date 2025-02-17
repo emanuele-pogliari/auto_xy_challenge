@@ -224,8 +224,8 @@ class ApiCarController extends AbstractController
     in: 'path',
     required: true,
     schema: new OA\Schema(type: 'integer')
-)]
-#[OA\Response(
+    )]
+    #[OA\Response(
     response: 200,
     description: 'Returns car details',
     content: new OA\JsonContent(
@@ -258,8 +258,8 @@ class ApiCarController extends AbstractController
             )
         ]
     )
-)]
-#[OA\Response(
+    )]
+    #[OA\Response(
     response: 404,
     description: 'Car not found',
     content: new OA\JsonContent(
@@ -267,11 +267,23 @@ class ApiCarController extends AbstractController
             new OA\Property(property: 'error', type: 'string', example: 'Car not found')
         ]
     )
-)]
+    )]
 
     public function show(int $id): JsonResponse
     {
         $car = $this->entityManager->getRepository(Car::class)->find($id);
+        if ($id <= 0) {
+            return $this->json([
+                'error' => 'Invalid ID format'
+            ], 400);
+        }
+
+        if (!$car) {
+            return $this->json([
+                'error' => 'Car not found',
+            ], 404);
+        }
+
         
         return $this->json($this->resultsForApi([$car]));
     }
