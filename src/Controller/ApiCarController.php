@@ -453,6 +453,122 @@ class ApiCarController extends AbstractController
         }
     }
 
+    #[OA\Put(
+        path: '/api/car/{id}/update',
+        summary: 'Update an existing car',
+        description: 'Updates a car\'s details. All fields are optional - only provided fields will be updated. Brand and model cannot be modified.'
+    )]
+    #[OA\Parameter(
+        name: 'id',
+        in: 'path',
+        required: true,
+        description: 'ID of the car to update',
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'year',
+                    type: 'integer',
+                    example: 2023,
+                    minimum: 1900,
+                    maximum: 2024,
+                    description: 'New year of the car'
+                ),
+                new OA\Property(
+                    property: 'price',
+                    type: 'number',
+                    example: 50000,
+                    minimum: 0,
+                    description: 'New price in EUR'
+                ),
+                new OA\Property(
+                    property: 'isAvailable',
+                    type: 'boolean',
+                    example: true,
+                    description: 'New availability status'
+                )
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Car updated successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'message',
+                    type: 'string',
+                    example: 'Car modified successfully'
+                ),
+                new OA\Property(
+                    property: 'data',
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'brand', type: 'string', example: 'BMW'),
+                        new OA\Property(property: 'model', type: 'string', example: 'X5'),
+                        new OA\Property(property: 'year', type: 'integer', example: 2023),
+                        new OA\Property(property: 'price', type: 'string', example: '50000.00 Eur'),
+                        new OA\Property(property: 'isAvailable', type: 'boolean', example: true)
+                    ]
+                )
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Invalid input',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'error',
+                    type: 'string',
+                    example: 'Invalid fields provided'
+                ),
+                new OA\Property(
+                    property: 'invalid_fields',
+                    type: 'array',
+                    items: new OA\Items(type: 'string'),
+                    example: ['invalidField']
+                )
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Car not found',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'error',
+                    type: 'string',
+                    example: 'Car not found'
+                )
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 500,
+        description: 'Server error',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'error',
+                    type: 'string',
+                    example: 'An error occurred'
+                ),
+                new OA\Property(
+                    property: 'message',
+                    type: 'string',
+                    example: 'Error message details'
+                )
+            ]
+        )
+    )]
+
     #[Route('/car/{id}/update', methods: ['PUT'])]
     public function updateCar(int $id, Request $request, PriceTransformer $priceTransformer): JsonResponse
     {
