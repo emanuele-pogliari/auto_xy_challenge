@@ -11,7 +11,7 @@ This project provides a RESTful API for managing a car catalog, built with Symfo
 1. Clone the repository:
 
 ```bash
-git clone [https://github.com/your-username/auto_xy_challenge.git]
+git clone [https://github.com/emanuele-pogliari/auto_xy_challenge.git]
 cd auto_xy_challenge
 ```
 
