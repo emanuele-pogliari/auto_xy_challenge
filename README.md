@@ -26,7 +26,7 @@ DATABASE_URL="mysql://your-username:your-password@db:3306/car_catalog?serverVers
 3. Start the Docker containers:
 
 ```bash
-docker-compose up -f docker-compose.yaml up --build
+docker-compose -f docker-compose.yaml up --build
 ```
 
 Wait for MySQL and the Symfony application to start.
